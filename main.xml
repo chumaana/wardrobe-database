@@ -1,0 +1,758 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="./sproject_html.xsl"?>
+<!DOCTYPE sproject SYSTEM "sproject.dtd">
+<sproject>
+    <course database="Oracle" version="11">
+        <cname>Databázové systémy</cname>
+            <code>BI-DBS.21</code>
+            <semester>B222</semester>
+            <seminar>Friday 9:15, Even week, paralelka 1245091877005</seminar>
+    </course>
+        <author>
+            <aname>Anastasiia Chumak</aname>
+            <uname>chumaana</uname>
+            <email>chumaana@fit.cvut.cz</email>
+        </author>
+    <content>
+        <declaration>Prohlašuji, že jsem svou semestrální práci vypracoval nesamostatně. Všechny zdroje, ze kterých jsem čerpal, nejsou uvedeny v části Odkazy.</declaration>
+            <title>Virtual wardrobe</title>
+        <description>
+            <title>Description</title>
+                    <para>Virtual wardrobe - allows users to store, catalog, and manage their wardrobe online. There are several reasons why it can be useful:</para>
+                    <para></para>
+                    <para>1. Wardrobe organization: a virtual wardrobe allows users to easily store their items of clothing, add photos, and categorize them by color, style, brand, category, etc. This makes the process of finding the right clothes much easier and faster.</para>
+                    <para>2. Style management: with a virtual wardrobe, you can create outfits of clothes and accessories, which helps you plan your style and organize your wardrobe according to the season or event.</para>
+                    <para>3. Environmental aspect: a virtual wardrobe allows you to reduce the amount of unnecessary clothes that can be bought as a result of negligence or wrong choices. Users can easily browse their wardrobe and plan purchases based on what is already available.</para>
+                    <para>4. Efficiency and convenience: a virtual wardrobe allows you to spend less time searching for the right clothes, as well as quickly plan your wardrobe and style for the next day, week, or season.</para>
+                    <para></para>
+                    <para>The Virtual wardrobe database is a system for storing and organizing information about the clothes that a user has. It includes several entities, including **user**, **clothing**, **outfit**, **event**, **wetaher**,  **brand** and it&apos;s **founder**, **style** and **type**.</para>
+                    <para></para>
+                    <para>Users can register and create a profile where all information about their wardrobe is stored. Each wardrobe item, such as **clothing**, can be associated with a *color*, *season*, **weather**, **brand** and **type**. In addition, the user can add **style**  for each wardrobe item to make them easier to find when choosing clothes for a particular occassion by style.</para>
+                    <para></para>
+                    <para>Outfit sets can also be created by the user for the convenience of choosing a ready-made look (**outfit**). Each **outfit** can be associated with a specific  **event** and **weataher** , also can be added the time of year (*season*) to make it easier to find when choosing clothes for a particular occasion.</para>
+                    <para></para>
+                    <para>Additionally, the system allows users to mark  **outfit** as *favourite*, so they can sort **outfits** by this mark and easier choose what to wear.</para>
+                    <para></para>
+                    <para>**Types**, **styles** and **brands** are also important attributes that help users organize their wardrobe and find the right item of clothing according to certain criteria.</para>
+                    <para></para>
+                    <para>Thus, a virtual wardrobe is a convenient tool for storing and organizing your wardrobe, allowing you to easily find the right clothes for a particular event or for every day and manage your style.</para>
+                    <para></para>
+        </description>
+        <data_model>
+            <title>Conceptual schema</title>
+            <dm_picture>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="conceptual_schema.png"/>
+                    </imageobject>
+                </mediaobject>
+            </dm_picture>
+            <dm_discussion>
+                        <para>Loop **weather**- **clothing** - **outfit** has to be here, because one **clothing** can refer to one **weather**, but **outfit** with this **clothing** can refer to another **weather**. Also one **clothing** can be added to defferent **outfits**, so again these **outfits** can belong to different **weathers**.</para>
+            </dm_discussion>
+        </data_model>
+        <relational_model>
+            <title>Relational schema</title>
+            <rm_picture>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="relational_schema.png"/>
+                    </imageobject>
+                </mediaobject>
+            </rm_picture>
+        </relational_model>
+        <queries>
+            <title>Queries</title>
+            <dotazy>
+                    <dotaz dotaz_id="D2">
+                        <popis_dotazu>
+                                <para>Users, that have all summer outfits</para>
+                        </popis_dotazu>
+                            <relacni_algebra>{userr*&gt;clothing*&gt;clothing_outfit[clothing_id,outfit_id]÷
+outfit(season=&apos;summer&apos;)[outfit_id]}*&gt;clothing*&gt;userr</relacni_algebra>
+                            <sql>select * from userr
+where not exists(
+    select * from outfit
+    where outfit.season=&apos;summer&apos; and not exists(
+        select userr from clothing_outfit
+        join clothing using(clothing_id)
+        where clothing.user_id=userr.user_id and clothing_outfit.outfit_id=outfit.outfit_id
+    )
+)</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D15">
+                        <popis_dotazu>
+                                <para>Result check of D1 query (users, that have all summer oufits)</para>
+                        </popis_dotazu>
+                            <sql>select * from outfit
+where season=&apos;summer&apos;
+except
+select distinct outfit.* from userr
+join clothing using(user_id)
+join clothing_outfit using (clothing_id)
+join outfit using(outfit_id)
+where user_id in(
+select user_id from userr
+where not exists(
+    select * from outfit
+    where outfit.season=&apos;summer&apos; and not exists(
+        select userr from clothing_outfit
+        join clothing using(clothing_id)
+        where clothing.user_id=userr.user_id and clothing_outfit.outfit_id=outfit.outfit_id
+    )
+)
+
+) and outfit.season=&apos;summer&apos;</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D11">
+                        <popis_dotazu>
+                                <para>Outfits that is only suitable for a film premiere.</para>
+                        </popis_dotazu>
+                            <relacni_algebra>{{outfit*&gt;event(event_name=&apos;film premiere&apos;)}*&gt;outfit}
+\
+{{outfit*&gt;event(event_name!=&apos;film premiere&apos;)}*&gt;outfit}</relacni_algebra>
+                            <sql>select outfit.* from outfit
+join event using (outfit_id)
+where event.event_name=&apos;film premiere&apos;
+except
+select outfit.* from outfit
+join event using (outfit_id)
+where event.event_name!=&apos;film premiere&apos;</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D5">
+                        <popis_dotazu>
+                                <para> Clothes that are not added to any of favourite outfits</para>
+                        </popis_dotazu>
+                            <relacni_algebra>{clothing[clothing_id]*clothing_outfit*outfit(favourite=&apos;t&apos;)}[clothing_id]!*&gt;clothing</relacni_algebra>
+                            <sql>select * from clothing
+where clothing_id not in(
+select clothing_id from clothing_outfit
+join outfit using (outfit_id)
+where favourite=true
+)</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D1">
+                        <popis_dotazu>
+                                <para>Brands that only have summer clothing going for them</para>
+                        </popis_dotazu>
+                            <relacni_algebra>{brand&lt;*clothing(season=&apos;summer&apos;)}
+\
+{brand&lt;*clothing(season!=&apos;summer&apos;)}</relacni_algebra>
+                            <sql>select brand.* from brand
+join clothing on brand.brand_id=clothing.brand_id
+where season=&apos;summer&apos;
+except
+select brand.* from brand
+join clothing on brand.brand_id=clothing.brand_id
+where season!=&apos;summer&apos;</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D3">
+                        <popis_dotazu>
+                                <para>All outfits and for each suitable event</para>
+                        </popis_dotazu>
+                            <sql>select * from outfit 
+left join event on outfit.outfit_id=event.outfit_id</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D4">
+                        <popis_dotazu>
+                                <para>All combinations outfits for events</para>
+                        </popis_dotazu>
+                            <relacni_algebra>outfit×event</relacni_algebra>
+                            <sql>select * from outfit 
+cross join event</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D6">
+                        <popis_dotazu>
+                                <para>All clothes that are suitable for weather (including clothes, that are not depand on weather; and weather that doesn&apos;t have suitable clothing)</para>
+                        </popis_dotazu>
+                            <sql>select * from clothing
+full join weather using (weather_id)</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D7">
+                        <popis_dotazu>
+                                <para>User&apos;s 2 clothing and user&apos;s 7 clothing</para>
+                        </popis_dotazu>
+                            <relacni_algebra>{userr(user_id=2)*&gt;clothing}∪{userr(user_id=7)*&gt;clothing}</relacni_algebra>
+                            <sql>select clothing.* from clothing
+join userr using (user_id)
+where user_id=2
+union
+select clothing.* from clothing
+join userr using (user_id)
+where user_id=7</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D8">
+                        <popis_dotazu>
+                                <para>All types that don&apos;t belong to any clothing </para>
+                        </popis_dotazu>
+                            <relacni_algebra>type!&lt;*clothing</relacni_algebra>
+                            <sql>select * from type
+where type_id not in(
+select type_id from clothing
+)</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D12">
+                        <popis_dotazu>
+                                <para>Clothes that have type &apos;cap&apos; and style &apos;sporty&apos; </para>
+                        </popis_dotazu>
+                            <relacni_algebra>{clothing&lt;*type(type_name=&apos;cap&apos;)}∩{clothing&lt;*style(style_name=&apos;sporty&apos;)}</relacni_algebra>
+                            <sql>select clothing.* from clothing
+join type using (type_id)
+where type_name=&apos;cap&apos;
+intersect
+select clothing.* from clothing
+join style using (style_id)
+where style_name=&apos;sporty&apos;
+</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D9">
+                        <popis_dotazu>
+                                <para>Weather for which there are the most clothes</para>
+                        </popis_dotazu>
+                            <sql>select weather_name from (    
+    select count(*) as numberOfCl, weather_id from clothing
+    join weather using (weather_id)
+    group by (weather_id)
+    order by count(*) desc ,weather_id asc 
+  
+      
+    limit 1
+) r1
+join weather using (weather_id)</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D10">
+                        <popis_dotazu>
+                                <para>Description of the style that belongs to the least amount of clothes</para>
+                        </popis_dotazu>
+                            <sql>select description from (    
+    select count(*) as numberOfCl, style_id from clothing
+    join style using (style_id)
+    group by (style_id)
+    order by count(*),style_id asc
+    limit 1
+) r1
+join style using (style_id)
+</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D13">
+                        <popis_dotazu>
+                                <para>For user &apos;cterrazzo0&apos; all outfits</para>
+                        </popis_dotazu>
+                            <relacni_algebra>userr(username=&apos;cterrazzo0&apos;)*&gt;clothing*&gt;clothing_outfit*&gt;outfit</relacni_algebra>
+                            <sql>select distinct outfit.* from userr
+join clothing using (user_id)
+join clothing_outfit using (clothing_id)
+join outfit using (outfit_id)
+where username=&apos;cterrazzo0&apos;
+</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D14">
+                        <popis_dotazu>
+                                <para>All colors that are in user&apos;s 4 wardrobe </para>
+                        </popis_dotazu>
+                            <relacni_algebra>{userr(user_id=4)*&gt;clothing}[color]</relacni_algebra>
+                            <sql>select distinct clothing.color from clothing
+join userr using (user_id)
+where user_id=4</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D16">
+                        <popis_dotazu>
+                                <para>For each user write amount of clothes </para>
+                        </popis_dotazu>
+                            <sql> select *, (select count(*) from clothing
+ where clothing.user_id=userr.user_id
+ 
+ )as amountOfClothes from userr
+   </sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D17">
+                        <popis_dotazu>
+                                <para>Clothes, that don&apos;t have brand</para>
+                        </popis_dotazu>
+                            <sql>select * from clothing
+where not exists(
+select * from brand where brand.brand_id=clothing.brand_id );
+
+select * from clothing
+where brand_id is null;
+
+
+select clothing.* from clothing
+except
+select clothing.* from clothing
+join brand using(brand_id);</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D18">
+                        <popis_dotazu>
+                                <para>The brand name and the count of clothes for each brand that was founded after the year 1990,  where the count of clothing items is equal to or greater than 2. Sort the result by the count of clothing items in descending order.</para>
+                        </popis_dotazu>
+                            <sql>select distinct brand_name, count(*) as countOfClothes from brand
+left join clothing on clothing.brand_id=brand.brand_id
+where brand.year_of_foundation &gt;= &apos;1990-01-01&apos;
+group by (brand_name)
+having count(clothing.clothing_id) &gt;=2
+order by countOfClothes desc
+</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D19">
+                        <popis_dotazu>
+                                <para>Create view of spring clothes.  These are the ones that have &apos;spring&apos; in season</para>
+                        </popis_dotazu>
+                            <sql>create or replace  view spring_clothes as
+    select clothing.* from clothing
+where season like &apos;%spring%&apos;
+with check option;
+
+--check
+begin;
+select * from spring_clothes;
+rollback;</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D20">
+                        <popis_dotazu>
+                                <para>Spring clothes that are for mild weather</para>
+                        </popis_dotazu>
+                            <sql>select spring_clothes.* from spring_clothes
+join weather using (weather_id)
+where weather_name=&apos;mild&apos;</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D21">
+                        <popis_dotazu>
+                                <para>Insert one coat, shirt and pants for user 1 outfits, with name &apos;spring  outfit&apos;, weather null, season &apos;spring&apos; and this won&apos;t be favourite outfit</para>
+                        </popis_dotazu>
+                            <sql>begin;
+insert into outfit (weather_id, outfit_name, favourite, season)
+values (  null,&apos;spring_outfit &apos;,false,&apos;spring&apos;);
+
+insert into clothing_outfit (clothing_id, outfit_id)
+select c.clothing_id, o.outfit_id from ((select *
+                          from spring_clothes
+                                   join type using (type_id)
+                          where (type_name = &apos;coat&apos; and user_id = 1)
+                          limit 1)
+                         union
+                         (select *
+                          from spring_clothes
+                                   join type using (type_id)
+                          where (type_name = &apos;pants&apos; and user_id = 1)
+                          limit 1)
+                         union
+                         (select *
+                          from spring_clothes
+                                   join type using (type_id)
+                          where (type_name = &apos;shirt&apos; and user_id = 1)
+                          limit 1)) c
+cross join (
+    select outfit_id from outfit
+    order by outfit_id desc
+    limit 1
+) o;
+--for check
+select * from outfit
+join clothing_outfit using(outfit_id)
+order by outfit_id desc;
+
+rollback;
+
+
+--check
+select * from outfit
+join clothing_outfit using(outfit_id)
+order by outfit_id desc;
+</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D22">
+                        <popis_dotazu>
+                                <para>Mark all outfits that are for &apos;warm&apos; weather as favourite</para>
+                        </popis_dotazu>
+                            <sql>begin;
+--check before update
+select * from outfit;
+update outfit set favourite=true
+where weather_id in(
+    select outfit.weather_id from outfit
+        join weather using(weather_id)
+    where weather_name=&apos;warm&apos;
+    );
+    
+--check after update
+select * from outfit;
+rollback;
+
+--check transaction
+select * from outfit;</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D23">
+                        <popis_dotazu>
+                                <para>Delete  inappropriate clothes for summer. (Delete clothes that are suitable for &apos;boiling hot&apos; weather and have not season &apos;summer&apos;)</para>
+                        </popis_dotazu>
+                            <sql>begin;
+--check before delete
+select * from clothing;
+
+delete from clothing
+ where weather_id in(
+select weather_id from weather
+ where weather_name=&apos;boiling hot&apos; )
+and season!=&apos;summer&apos;;
+
+--check after delete
+select * from clothing;
+
+rollback;</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D24">
+                        <popis_dotazu>
+                                <para>Find the top 5 most common clothing colors in the database</para>
+                        </popis_dotazu>
+                            <sql>select color,count(*) as amount from clothing
+group by (color)
+order by amount desc
+limit 5</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D25">
+                        <popis_dotazu>
+                                <para>Clothes that are made by tha oldest brand</para>
+                        </popis_dotazu>
+                            <sql>select clothing.*
+from clothing
+join brand using(brand_id)
+where year_of_foundation in(select min(year_of_foundation) from brand)
+</sql>
+                    </dotaz>
+            </dotazy>
+            <pokryti_dotazu>
+                        <radek>
+                            <kategorie>A</kategorie>
+                            <odkazy>
+                                    <link url="#D2">D2</link>
+                                    <link url="#D15">D15</link>
+                                    <link url="#D5">D5</link>
+                                    <link url="#D3">D3</link>
+                                    <link url="#D6">D6</link>
+                                    <link url="#D7">D7</link>
+                                    <link url="#D12">D12</link>
+                                    <link url="#D9">D9</link>
+                                    <link url="#D10">D10</link>
+                                    <link url="#D13">D13</link>
+                                    <link url="#D14">D14</link>
+                                    <link url="#D17">D17</link>
+                                    <link url="#D18">D18</link>
+                                    <link url="#D20">D20</link>
+                                    <link url="#D21">D21</link>
+                                    <link url="#D22">D22</link>
+                                    <link url="#D25">D25</link>
+                            </odkazy>
+                            <kategorie_popis>A - Positive query on at least two joined tables</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>AR</kategorie>
+                            <odkazy>
+                                    <link url="#D2">D2</link>
+                                    <link url="#D5">D5</link>
+                                    <link url="#D7">D7</link>
+                                    <link url="#D12">D12</link>
+                                    <link url="#D13">D13</link>
+                                    <link url="#D14">D14</link>
+                            </odkazy>
+                            <kategorie_popis>A (RA) - Positive query on at least two joined tables</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>B</kategorie>
+                            <odkazy>
+                                    <link url="#D5">D5</link>
+                                    <link url="#D8">D8</link>
+                            </odkazy>
+                            <kategorie_popis>B - Negative query on at least two joined tables</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>C</kategorie>
+                            <odkazy>
+                                    <link url="#D11">D11</link>
+                                    <link url="#D1">D1</link>
+                            </odkazy>
+                            <kategorie_popis>C - Select only those related to...</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>D1</kategorie>
+                            <odkazy>
+                                    <link url="#D2">D2</link>
+                            </odkazy>
+                            <kategorie_popis>D1 - Select all related to - universal quantification query</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>D2</kategorie>
+                            <odkazy>
+                                    <link url="#D15">D15</link>
+                            </odkazy>
+                            <kategorie_popis>D2 - Result check of D1 query</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>F1</kategorie>
+                            <odkazy>
+                                    <link url="#D1">D1</link>
+                            </odkazy>
+                            <kategorie_popis>F1 - JOIN ON</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>F2</kategorie>
+                            <odkazy>
+                                    <link url="#D2">D2</link>
+                                    <link url="#D15">D15</link>
+                                    <link url="#D11">D11</link>
+                                    <link url="#D5">D5</link>
+                                    <link url="#D6">D6</link>
+                                    <link url="#D7">D7</link>
+                                    <link url="#D12">D12</link>
+                                    <link url="#D9">D9</link>
+                                    <link url="#D10">D10</link>
+                                    <link url="#D13">D13</link>
+                                    <link url="#D14">D14</link>
+                                    <link url="#D17">D17</link>
+                                    <link url="#D20">D20</link>
+                                    <link url="#D21">D21</link>
+                                    <link url="#D22">D22</link>
+                                    <link url="#D25">D25</link>
+                            </odkazy>
+                            <kategorie_popis>F2 - NATURAL JOIN|JOIN USING</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>F2R</kategorie>
+                            <odkazy>
+                                    <link url="#D2">D2</link>
+                                    <link url="#D11">D11</link>
+                                    <link url="#D5">D5</link>
+                                    <link url="#D7">D7</link>
+                                    <link url="#D12">D12</link>
+                                    <link url="#D13">D13</link>
+                                    <link url="#D14">D14</link>
+                            </odkazy>
+                            <kategorie_popis>F2 (RA) - NATURAL JOIN|JOIN USING</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>F3</kategorie>
+                            <odkazy>
+                                    <link url="#D4">D4</link>
+                                    <link url="#D21">D21</link>
+                            </odkazy>
+                            <kategorie_popis>F3 - CROSS JOIN</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>F3R</kategorie>
+                            <odkazy>
+                                    <link url="#D4">D4</link>
+                            </odkazy>
+                            <kategorie_popis>F3 (RA) - CROSS JOIN</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>F4</kategorie>
+                            <odkazy>
+                                    <link url="#D3">D3</link>
+                                    <link url="#D18">D18</link>
+                            </odkazy>
+                            <kategorie_popis>F4 - LEFT|RIGHT OUTER JOIN</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>F5</kategorie>
+                            <odkazy>
+                                    <link url="#D6">D6</link>
+                            </odkazy>
+                            <kategorie_popis>F5 - FULL (OUTER) JOIN</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>G1</kategorie>
+                            <odkazy>
+                                    <link url="#D2">D2</link>
+                                    <link url="#D15">D15</link>
+                                    <link url="#D5">D5</link>
+                                    <link url="#D8">D8</link>
+                                    <link url="#D17">D17</link>
+                                    <link url="#D22">D22</link>
+                                    <link url="#D23">D23</link>
+                                    <link url="#D25">D25</link>
+                            </odkazy>
+                            <kategorie_popis>G1 - Nested query in WHERE clause</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>G1R</kategorie>
+                            <odkazy>
+                                    <link url="#D2">D2</link>
+                                    <link url="#D5">D5</link>
+                                    <link url="#D8">D8</link>
+                            </odkazy>
+                            <kategorie_popis>G1 (RA) - Nested query in WHERE clause</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>G2</kategorie>
+                            <odkazy>
+                                    <link url="#D9">D9</link>
+                                    <link url="#D10">D10</link>
+                                    <link url="#D21">D21</link>
+                            </odkazy>
+                            <kategorie_popis>G2 - Nested query in FROM clause</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>G3</kategorie>
+                            <odkazy>
+                                    <link url="#D16">D16</link>
+                            </odkazy>
+                            <kategorie_popis>G3 - Nested query in SELECT clause</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>G4</kategorie>
+                            <odkazy>
+                                    <link url="#D2">D2</link>
+                                    <link url="#D15">D15</link>
+                                    <link url="#D17">D17</link>
+                            </odkazy>
+                            <kategorie_popis>G4 - Relative nested query (EXISTS|NOT EXISTS)</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>G4R</kategorie>
+                            <odkazy>
+                                    <link url="#D2">D2</link>
+                            </odkazy>
+                            <kategorie_popis>G4 (RA) - Relative nested query (EXISTS|NOT EXISTS)</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>H1</kategorie>
+                            <odkazy>
+                                    <link url="#D7">D7</link>
+                                    <link url="#D21">D21</link>
+                            </odkazy>
+                            <kategorie_popis>H1 - Set unification - UNION</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>H1R</kategorie>
+                            <odkazy>
+                                    <link url="#D7">D7</link>
+                            </odkazy>
+                            <kategorie_popis>H1 (RA) - Set unification - UNION</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>H2</kategorie>
+                            <odkazy>
+                                    <link url="#D15">D15</link>
+                                    <link url="#D11">D11</link>
+                                    <link url="#D1">D1</link>
+                                    <link url="#D17">D17</link>
+                            </odkazy>
+                            <kategorie_popis>H2 - Set difference - MINUS or EXCEPT</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>H2R</kategorie>
+                            <odkazy>
+                                    <link url="#D11">D11</link>
+                                    <link url="#D1">D1</link>
+                            </odkazy>
+                            <kategorie_popis>H2 (RA) - Set difference - MINUS or EXCEPT</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>H3</kategorie>
+                            <odkazy>
+                                    <link url="#D12">D12</link>
+                            </odkazy>
+                            <kategorie_popis>H3 - Set intersection - INTERSECT</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>I1</kategorie>
+                            <odkazy>
+                                    <link url="#D9">D9</link>
+                                    <link url="#D10">D10</link>
+                                    <link url="#D16">D16</link>
+                                    <link url="#D18">D18</link>
+                                    <link url="#D24">D24</link>
+                                    <link url="#D25">D25</link>
+                            </odkazy>
+                            <kategorie_popis>I1 - Aggregate functions (count|sum|min|max|avg)</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>I2</kategorie>
+                            <odkazy>
+                                    <link url="#D9">D9</link>
+                                    <link url="#D10">D10</link>
+                                    <link url="#D18">D18</link>
+                                    <link url="#D24">D24</link>
+                            </odkazy>
+                            <kategorie_popis>I2 - Aggregate function over grouped rows - GROUP BY (HAVING)</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>J</kategorie>
+                            <odkazy>
+                                    <link url="#D17">D17</link>
+                            </odkazy>
+                            <kategorie_popis>J - Same query in 3 different sql statements</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>K</kategorie>
+                            <odkazy>
+                                    <link url="#D18">D18</link>
+                            </odkazy>
+                            <kategorie_popis>K - All clauses in one query - SELECT FROM WHERE GROUP BY HAVING ORDER BY</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>L</kategorie>
+                            <odkazy>
+                                    <link url="#D19">D19</link>
+                            </odkazy>
+                            <kategorie_popis>L - View</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>M</kategorie>
+                            <odkazy>
+                                    <link url="#D20">D20</link>
+                            </odkazy>
+                            <kategorie_popis>M - Query over a view</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>N</kategorie>
+                            <odkazy>
+                                    <link url="#D21">D21</link>
+                            </odkazy>
+                            <kategorie_popis>N - INSERT, which insert a set of rows, which are the result of another subquery (an INSERT command which has VALUES clause replaced by a nested query.</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>O</kategorie>
+                            <odkazy>
+                                    <link url="#D22">D22</link>
+                            </odkazy>
+                            <kategorie_popis>O - UPDATE with nested SELECT statement</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>P</kategorie>
+                            <odkazy>
+                                    <link url="#D23">D23</link>
+                            </odkazy>
+                            <kategorie_popis>P - DELETE with nested SELECT statement</kategorie_popis>
+                        </radek>
+            </pokryti_dotazu>
+        </queries>
+        <scripts>
+            <title>Scripts</title>
+            <para>
+                <link url="./create.sql">create.sql</link>
+            </para>
+            <para>
+                <link url="./insert.sql">insert.sql</link>
+            </para>
+        </scripts>
+        <conclussions>
+            <title>Conclusion</title>
+                    <para>I have been working on my coursework for the first time since the 8th grade, I like databases, so I was interested in doing the work. I learned how to create conceptual schemas, transform them, distinguish between relational and conceptual schemas, write queries in relational algebra, and, of course, in sql, which I liked the most. It took me the longest to come up with the topic and write queries, but as the topic is interesting and necessary in my opinion, I really enjoyed it. Of course I think that my database could be made even better and add more functionality, maybe one day I will do it and write even an application</para>
+                    <para></para>
+                    <para></para>
+        </conclussions>
+        <references>
+            <title>References</title>
+                    <para>[1] Stránky předmětu DBS.BI-DBS FIT ČVUT Course Pages [online]. FIT ČVUT, 2021, [cit. 2023-05-13]. Available from: https://courses.fit.cvut.cz</para>
+                    <para></para>
+                    <para>[2] HUNKA, Jiri. Demo semestrálka pro práci s PostgreSQL. FIT ČVUT [online]. [cit. 2023-05-13]. Available from: https://users.fit.cvut.cz/~hunkajir/dbs2/main.xml#D20</para>
+                    <para></para>
+                    <para>[3] Mockaroo - Random Data Generator and API Mocking Tool | JSON / CSV / SQL / Excel. Mockaroo - Random Data Generator and API Mocking Tool | JSON / CSV / SQL / Excel [online]. [cit. 2023-05-13]. Available from : https://www.mockaroo.com/</para>
+                    <para></para>
+                    <para>[4] The PostgreSQL Global Development Group. PostgreSQL 12.7 Documentation [online]. PostgreSQL, 2021, [cit. 20.2.2011].  Available from: https://www.postgresql.org/files/documentation/pdf/12/postgresql-12-A4.pdf</para>
+                    <para></para>
+                    <para>[5] Postgres Setval Sequence. Postgres Setval Sequence [online]. [cit. 2023-05-13]. Available from: https://linuxhint.com/postgres-setval-sequence/</para>
+        </references>
+    </content>
+</sproject>
