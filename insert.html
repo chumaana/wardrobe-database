@@ -163,7 +163,7 @@
         insert into outfit  (outfit_id, weather_id, outfit_name, favourite, season) values (5,null, 'for parties', true, null);
         insert into outfit  (outfit_id, weather_id, outfit_name, favourite, season) values (6,null, 'for sport', false, 'summer');
         insert into outfit  (outfit_id, weather_id, outfit_name, favourite, season) values (7,null, 'fav', true, null);
-        select setval(pg_get_serial_sequence('outfit','outfit_id'),8,false);
+        select setval(pg_get_serial_sequence('outfit','outfit_id'),7);
         
         
         -- event
