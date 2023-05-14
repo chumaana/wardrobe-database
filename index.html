@@ -1,0 +1,668 @@
+<html>
+
+<head>
+    <META http-equiv="Content-Type" content="text/html; charset=UTF-16">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>BI-DBS.21 - Anastasiia Chumak (chumaana) </title>
+    <link rel="stylesheet" type="text/css" href="./sproject_html.css">
+</head>
+
+<body>
+    <script type="text/javascript">
+        var display = 0;
+        function noComment() {
+            var comments = document.getElementsByName("comment");
+            if (display == 1) {
+                set_to = 'block';
+                display = 0;
+            }
+            else {
+                set_to = 'none';
+                display = 1;
+            };
+            for (i in comments) {
+                el = comments[i].style;
+                el.display = set_to;
+            }
+            return false;
+        }
+    </script><input type="button" value=" Vypnout / zapnout zobrazeni komentaru" onClick="return noComment();">
+    <h3 class="course">BI-DBS.21 - Databázové systémy, B222</h3>
+    <h3 class="author">Anastasiia Chumak ( chumaana ) Friday 9:15, Even week, paralelka 1245091877005</h3>
+    <h4 class="author"><a href="
+			mailto:chumaana@fit.cvut.cz">chumaana@fit.cvut.cz</a></h4>
+    <p class="declaration">Prohlašuji, že jsem svou semestrální práci vypracoval nesamostatně. Všechny zdroje, ze
+        kterých jsem čerpal, nejsou uvedeny v části Odkazy.</p>
+    <h1>Virtual wardrobe</h1>
+    <h2>Description</h2>
+    <p>Virtual wardrobe - allows users to store, catalog, and manage their wardrobe online. There are several reasons
+        why it can be useful:</p>
+    <p></p>
+    <p>1. Wardrobe organization: a virtual wardrobe allows users to easily store their items of clothing, add photos,
+        and categorize them by color, style, brand, category, etc. This makes the process of finding the right clothes
+        much easier and faster.</p>
+    <p>2. Style management: with a virtual wardrobe, you can create outfits of clothes and accessories, which helps you
+        plan your style and organize your wardrobe according to the season or event.</p>
+    <p>3. Environmental aspect: a virtual wardrobe allows you to reduce the amount of unnecessary clothes that can be
+        bought as a result of negligence or wrong choices. Users can easily browse their wardrobe and plan purchases
+        based on what is already available.</p>
+    <p>4. Efficiency and convenience: a virtual wardrobe allows you to spend less time searching for the right clothes,
+        as well as quickly plan your wardrobe and style for the next day, week, or season.</p>
+    <p></p>
+    <p>The Virtual wardrobe database is a system for storing and organizing information about the clothes that a user
+        has. It includes several entities, including **user**, **clothing**, **outfit**, **event**, **wetaher**,
+        **brand** and it's **founder**, **style** and **type**.</p>
+    <p></p>
+    <p>Users can register and create a profile where all information about their wardrobe is stored. Each wardrobe item,
+        such as **clothing**, can be associated with a *color*, *season*, **weather**, **brand** and **type**. In
+        addition, the user can add **style** for each wardrobe item to make them easier to find when choosing clothes
+        for a particular occassion by style.</p>
+    <p></p>
+    <p>Outfit sets can also be created by the user for the convenience of choosing a ready-made look (**outfit**). Each
+        **outfit** can be associated with a specific **event** and **weataher** , also can be added the time of year
+        (*season*) to make it easier to find when choosing clothes for a particular occasion.</p>
+    <p></p>
+    <p>Additionally, the system allows users to mark **outfit** as *favourite*, so they can sort **outfits** by this
+        mark and easier choose what to wear.</p>
+    <p></p>
+    <p>**Types**, **styles** and **brands** are also important attributes that help users organize their wardrobe and
+        find the right item of clothing according to certain criteria.</p>
+    <p></p>
+    <p>Thus, a virtual wardrobe is a convenient tool for storing and organizing your wardrobe, allowing you to easily
+        find the right clothes for a particular event or for every day and manage your style.</p>
+    <p></p>
+    <h2>Conceptual schema</h2><img src="conceptual_schema.png" alt="
+			Zde má být obrázek vašeho konceptuálního modelu.
+               ">
+    <p>Loop **weather**- **clothing** - **outfit** has to be here, because one **clothing** can refer to one
+        **weather**, but **outfit** with this **clothing** can refer to another **weather**. Also one **clothing** can
+        be added to defferent **outfits**, so again these **outfits** can belong to different **weathers**.</p>
+    <h2>Relational schema</h2><img src="relational_schema.png" alt="
+			Zde má být obrázek vašeho relačního modelu.
+               ">
+    <h2>Queries</h2>
+    <ol>
+        <li>
+            <p> Kód dotazu: <b><a name="D2">D2</a></b><a href="#tabulka_pokryti"> [Tabulka pokryti kategorií SQL
+                    příkazů]</a></p>
+            <p>Users, that have all summer outfits</p>
+            <p class="ra">{userr*&gt;clothing*&gt;clothing_outfit[clothing_id,outfit_id]÷
+                outfit(season='summer')[outfit_id]}*&gt;clothing*&gt;userr</p>
+            <p class="sql">select * from userr
+                where not exists(
+                select * from outfit
+                where outfit.season='summer' and not exists(
+                select userr from clothing_outfit
+                join clothing using(clothing_id)
+                where clothing.user_id=userr.user_id and clothing_outfit.outfit_id=outfit.outfit_id
+                )
+                )</p>
+        </li>
+        <li>
+            <p> Kód dotazu: <b><a name="D15">D15</a></b><a href="#tabulka_pokryti"> [Tabulka pokryti kategorií SQL
+                    příkazů]</a></p>
+            <p>Result check of D1 query (users, that have all summer oufits)</p>
+            <p class="sql">select * from outfit
+                where season='summer'
+                except
+                select distinct outfit.* from userr
+                join clothing using(user_id)
+                join clothing_outfit using (clothing_id)
+                join outfit using(outfit_id)
+                where user_id in(
+                select user_id from userr
+                where not exists(
+                select * from outfit
+                where outfit.season='summer' and not exists(
+                select userr from clothing_outfit
+                join clothing using(clothing_id)
+                where clothing.user_id=userr.user_id and clothing_outfit.outfit_id=outfit.outfit_id
+                )
+                )
+
+                ) and outfit.season='summer'</p>
+        </li>
+        <li>
+            <p> Kód dotazu: <b><a name="D11">D11</a></b><a href="#tabulka_pokryti"> [Tabulka pokryti kategorií SQL
+                    příkazů]</a></p>
+            <p>Outfits that is only suitable for a film premiere.</p>
+            <p class="ra">{{outfit*&gt;event(event_name='film premiere')}*&gt;outfit}
+                \
+                {{outfit*&gt;event(event_name!='film premiere')}*&gt;outfit}</p>
+            <p class="sql">select outfit.* from outfit
+                join event using (outfit_id)
+                where event.event_name='film premiere'
+                except
+                select outfit.* from outfit
+                join event using (outfit_id)
+                where event.event_name!='film premiere'</p>
+        </li>
+        <li>
+            <p> Kód dotazu: <b><a name="D5">D5</a></b><a href="#tabulka_pokryti"> [Tabulka pokryti kategorií SQL
+                    příkazů]</a></p>
+            <p> Clothes that are not added to any of favourite outfits</p>
+            <p class="ra">{clothing[clothing_id]*clothing_outfit*outfit(favourite='t')}[clothing_id]!*&gt;clothing</p>
+            <p class="sql">select * from clothing
+                where clothing_id not in(
+                select clothing_id from clothing_outfit
+                join outfit using (outfit_id)
+                where favourite=true
+                )</p>
+        </li>
+        <li>
+            <p> Kód dotazu: <b><a name="D1">D1</a></b><a href="#tabulka_pokryti"> [Tabulka pokryti kategorií SQL
+                    příkazů]</a></p>
+            <p>Brands that only have summer clothing going for them</p>
+            <p class="ra">{brand&lt;*clothing(season='summer')}
+                \
+                {brand&lt;*clothing(season!='summer')}</p>
+            <p class="sql">select brand.* from brand
+                join clothing on brand.brand_id=clothing.brand_id
+                where season='summer'
+                except
+                select brand.* from brand
+                join clothing on brand.brand_id=clothing.brand_id
+                where season!='summer'</p>
+        </li>
+        <li>
+            <p> Kód dotazu: <b><a name="D3">D3</a></b><a href="#tabulka_pokryti"> [Tabulka pokryti kategorií SQL
+                    příkazů]</a></p>
+            <p>All outfits and for each suitable event</p>
+            <p class="sql">select * from outfit
+                left join event on outfit.outfit_id=event.outfit_id</p>
+        </li>
+        <li>
+            <p> Kód dotazu: <b><a name="D4">D4</a></b><a href="#tabulka_pokryti"> [Tabulka pokryti kategorií SQL
+                    příkazů]</a></p>
+            <p>All combinations outfits for events</p>
+            <p class="ra">outfit×event</p>
+            <p class="sql">select * from outfit
+                cross join event</p>
+        </li>
+        <li>
+            <p> Kód dotazu: <b><a name="D6">D6</a></b><a href="#tabulka_pokryti"> [Tabulka pokryti kategorií SQL
+                    příkazů]</a></p>
+            <p>All clothes that are suitable for weather (including clothes, that are not depand on weather; and weather
+                that doesn't have suitable clothing)</p>
+            <p class="sql">select * from clothing
+                full join weather using (weather_id)</p>
+        </li>
+        <li>
+            <p> Kód dotazu: <b><a name="D7">D7</a></b><a href="#tabulka_pokryti"> [Tabulka pokryti kategorií SQL
+                    příkazů]</a></p>
+            <p>User's 2 clothing and user's 7 clothing</p>
+            <p class="ra">{userr(user_id=2)*&gt;clothing}∪{userr(user_id=7)*&gt;clothing}</p>
+            <p class="sql">select clothing.* from clothing
+                join userr using (user_id)
+                where user_id=2
+                union
+                select clothing.* from clothing
+                join userr using (user_id)
+                where user_id=7</p>
+        </li>
+        <li>
+            <p> Kód dotazu: <b><a name="D8">D8</a></b><a href="#tabulka_pokryti"> [Tabulka pokryti kategorií SQL
+                    příkazů]</a></p>
+            <p>All types that don't belong to any clothing </p>
+            <p class="ra">type!&lt;*clothing</p>
+            <p class="sql">select * from type
+                where type_id not in(
+                select type_id from clothing
+                )</p>
+        </li>
+        <li>
+            <p> Kód dotazu: <b><a name="D12">D12</a></b><a href="#tabulka_pokryti"> [Tabulka pokryti kategorií SQL
+                    příkazů]</a></p>
+            <p>Clothes that have type 'cap' and style 'sporty' </p>
+            <p class="ra">{clothing&lt;*type(type_name='cap')}∩{clothing&lt;*style(style_name='sporty')}</p>
+            <p class="sql">select clothing.* from clothing
+                join type using (type_id)
+                where type_name='cap'
+                intersect
+                select clothing.* from clothing
+                join style using (style_id)
+                where style_name='sporty'
+            </p>
+        </li>
+        <li>
+            <p> Kód dotazu: <b><a name="D9">D9</a></b><a href="#tabulka_pokryti"> [Tabulka pokryti kategorií SQL
+                    příkazů]</a></p>
+            <p>Weather for which there are the most clothes</p>
+            <p class="sql">select weather_name from (
+                select count(*) as numberOfCl, weather_id from clothing
+                join weather using (weather_id)
+                group by (weather_id)
+                order by count(*) desc ,weather_id asc
+
+
+                limit 1
+                ) r1
+                join weather using (weather_id)</p>
+        </li>
+        <li>
+            <p> Kód dotazu: <b><a name="D10">D10</a></b><a href="#tabulka_pokryti"> [Tabulka pokryti kategorií SQL
+                    příkazů]</a></p>
+            <p>Description of the style that belongs to the least amount of clothes</p>
+            <p class="sql">select description from (
+                select count(*) as numberOfCl, style_id from clothing
+                join style using (style_id)
+                group by (style_id)
+                order by count(*),style_id asc
+                limit 1
+                ) r1
+                join style using (style_id)
+            </p>
+        </li>
+        <li>
+            <p> Kód dotazu: <b><a name="D13">D13</a></b><a href="#tabulka_pokryti"> [Tabulka pokryti kategorií SQL
+                    příkazů]</a></p>
+            <p>For user 'cterrazzo0' all outfits</p>
+            <p class="ra">userr(username='cterrazzo0')*&gt;clothing*&gt;clothing_outfit*&gt;outfit</p>
+            <p class="sql">select distinct outfit.* from userr
+                join clothing using (user_id)
+                join clothing_outfit using (clothing_id)
+                join outfit using (outfit_id)
+                where username='cterrazzo0'
+            </p>
+        </li>
+        <li>
+            <p> Kód dotazu: <b><a name="D14">D14</a></b><a href="#tabulka_pokryti"> [Tabulka pokryti kategorií SQL
+                    příkazů]</a></p>
+            <p>All colors that are in user's 4 wardrobe </p>
+            <p class="ra">{userr(user_id=4)*&gt;clothing}[color]</p>
+            <p class="sql">select distinct clothing.color from clothing
+                join userr using (user_id)
+                where user_id=4</p>
+        </li>
+        <li>
+            <p> Kód dotazu: <b><a name="D16">D16</a></b><a href="#tabulka_pokryti"> [Tabulka pokryti kategorií SQL
+                    příkazů]</a></p>
+            <p>For each user write amount of clothes </p>
+            <p class="sql"> select *, (select count(*) from clothing
+                where clothing.user_id=userr.user_id
+
+                )as amountOfClothes from userr
+            </p>
+        </li>
+        <li>
+            <p> Kód dotazu: <b><a name="D17">D17</a></b><a href="#tabulka_pokryti"> [Tabulka pokryti kategorií SQL
+                    příkazů]</a></p>
+            <p>Clothes, that don't have brand</p>
+            <p class="sql">select * from clothing
+                where not exists(
+                select * from brand where brand.brand_id=clothing.brand_id );
+
+                select * from clothing
+                where brand_id is null;
+
+
+                select clothing.* from clothing
+                except
+                select clothing.* from clothing
+                join brand using(brand_id);</p>
+        </li>
+        <li>
+            <p> Kód dotazu: <b><a name="D18">D18</a></b><a href="#tabulka_pokryti"> [Tabulka pokryti kategorií SQL
+                    příkazů]</a></p>
+            <p>The brand name and the count of clothes for each brand that was founded after the year 1990, where the
+                count of clothing items is equal to or greater than 2. Sort the result by the count of clothing items in
+                descending order.</p>
+            <p class="sql">select distinct brand_name, count(*) as countOfClothes from brand
+                left join clothing on clothing.brand_id=brand.brand_id
+                where brand.year_of_foundation &gt;= '1990-01-01'
+                group by (brand_name)
+                having count(clothing.clothing_id) &gt;=2
+                order by countOfClothes desc
+            </p>
+        </li>
+        <li>
+            <p> Kód dotazu: <b><a name="D19">D19</a></b><a href="#tabulka_pokryti"> [Tabulka pokryti kategorií SQL
+                    příkazů]</a></p>
+            <p>Create view of spring clothes. These are the ones that have 'spring' in season</p>
+            <p class="sql">create or replace view spring_clothes as
+                select clothing.* from clothing
+                where season like '%spring%'
+                with check option;
+
+                --check
+                begin;
+                select * from spring_clothes;
+                rollback;</p>
+        </li>
+        <li>
+            <p> Kód dotazu: <b><a name="D20">D20</a></b><a href="#tabulka_pokryti"> [Tabulka pokryti kategorií SQL
+                    příkazů]</a></p>
+            <p>Spring clothes that are for mild weather</p>
+            <p class="sql">select spring_clothes.* from spring_clothes
+                join weather using (weather_id)
+                where weather_name='mild'</p>
+        </li>
+        <li>
+            <p> Kód dotazu: <b><a name="D21">D21</a></b><a href="#tabulka_pokryti"> [Tabulka pokryti kategorií SQL
+                    příkazů]</a></p>
+            <p>Insert one coat, shirt and pants for user 1 outfits, with name 'spring outfit', weather null, season
+                'spring' and this won't be favourite outfit</p>
+            <p class="sql">begin;
+                insert into outfit (weather_id, outfit_name, favourite, season)
+                values ( null,'spring_outfit ',false,'spring');
+
+                insert into clothing_outfit (clothing_id, outfit_id)
+                select c.clothing_id, o.outfit_id from ((select *
+                from spring_clothes
+                join type using (type_id)
+                where (type_name = 'coat' and user_id = 1)
+                limit 1)
+                union
+                (select *
+                from spring_clothes
+                join type using (type_id)
+                where (type_name = 'pants' and user_id = 1)
+                limit 1)
+                union
+                (select *
+                from spring_clothes
+                join type using (type_id)
+                where (type_name = 'shirt' and user_id = 1)
+                limit 1)) c
+                cross join (
+                select outfit_id from outfit
+                order by outfit_id desc
+                limit 1
+                ) o;
+                --for check
+                select * from outfit
+                join clothing_outfit using(outfit_id)
+                order by outfit_id desc;
+
+                rollback;
+
+
+                --check
+                select * from outfit
+                join clothing_outfit using(outfit_id)
+                order by outfit_id desc;
+            </p>
+        </li>
+        <li>
+            <p> Kód dotazu: <b><a name="D22">D22</a></b><a href="#tabulka_pokryti"> [Tabulka pokryti kategorií SQL
+                    příkazů]</a></p>
+            <p>Mark all outfits that are for 'warm' weather as favourite</p>
+            <p class="sql">begin;
+                --check before update
+                select * from outfit;
+                update outfit set favourite=true
+                where weather_id in(
+                select outfit.weather_id from outfit
+                join weather using(weather_id)
+                where weather_name='warm'
+                );
+
+                --check after update
+                select * from outfit;
+                rollback;
+
+                --check transaction
+                select * from outfit;</p>
+        </li>
+        <li>
+            <p> Kód dotazu: <b><a name="D23">D23</a></b><a href="#tabulka_pokryti"> [Tabulka pokryti kategorií SQL
+                    příkazů]</a></p>
+            <p>Delete inappropriate clothes for summer. (Delete clothes that are suitable for 'boiling hot' weather and
+                have not season 'summer')</p>
+            <p class="sql">begin;
+                --check before delete
+                select * from clothing;
+
+                delete from clothing
+                where weather_id in(
+                select weather_id from weather
+                where weather_name='boiling hot' )
+                and season!='summer';
+
+                --check after delete
+                select * from clothing;
+
+                rollback;</p>
+        </li>
+        <li>
+            <p> Kód dotazu: <b><a name="D24">D24</a></b><a href="#tabulka_pokryti"> [Tabulka pokryti kategorií SQL
+                    příkazů]</a></p>
+            <p>Find the top 5 most common clothing colors in the database</p>
+            <p class="sql">select color,count(*) as amount from clothing
+                group by (color)
+                order by amount desc
+                limit 5</p>
+        </li>
+        <li>
+            <p> Kód dotazu: <b><a name="D25">D25</a></b><a href="#tabulka_pokryti"> [Tabulka pokryti kategorií SQL
+                    příkazů]</a></p>
+            <p>Clothes that are made by tha oldest brand</p>
+            <p class="sql">select clothing.*
+                from clothing
+                join brand using(brand_id)
+                where year_of_foundation in(select min(year_of_foundation) from brand)
+            </p>
+        </li>
+    </ol>
+    <h2><a name="tabulka_pokryti"> Tabulka pokrytí kategorií SQL příkazů </a></h2>
+    <table>
+        <tbody>
+            <tr>
+                <th> Kategorie </th>
+                <th> Kódy porývajících dotazů</th>
+                <th> Charekteristika kategorie příkazu</th>
+            </tr>
+            <tr>
+                <td>A</td>
+                <td><a href="#D2">D2</a> <a href="#D15">D15</a> <a href="#D5">D5</a> <a href="#D3">D3</a> <a
+                        href="#D6">D6</a> <a href="#D7">D7</a> <a href="#D12">D12</a> <a href="#D9">D9</a> <a
+                        href="#D10">D10</a> <a href="#D13">D13</a> <a href="#D14">D14</a> <a href="#D17">D17</a> <a
+                        href="#D18">D18</a> <a href="#D20">D20</a> <a href="#D21">D21</a> <a href="#D22">D22</a> <a
+                        href="#D25">D25</a> </td>
+                <td>A - Positive query on at least two joined tables</td>
+            </tr>
+            <tr>
+                <td>AR</td>
+                <td><a href="#D2">D2</a> <a href="#D5">D5</a> <a href="#D7">D7</a> <a href="#D12">D12</a> <a
+                        href="#D13">D13</a> <a href="#D14">D14</a> </td>
+                <td>A (RA) - Positive query on at least two joined tables</td>
+            </tr>
+            <tr>
+                <td>B</td>
+                <td><a href="#D5">D5</a> <a href="#D8">D8</a> </td>
+                <td>B - Negative query on at least two joined tables</td>
+            </tr>
+            <tr>
+                <td>C</td>
+                <td><a href="#D11">D11</a> <a href="#D1">D1</a> </td>
+                <td>C - Select only those related to...</td>
+            </tr>
+            <tr>
+                <td>D1</td>
+                <td><a href="#D2">D2</a> </td>
+                <td>D1 - Select all related to - universal quantification query</td>
+            </tr>
+            <tr>
+                <td>D2</td>
+                <td><a href="#D15">D15</a> </td>
+                <td>D2 - Result check of D1 query</td>
+            </tr>
+            <tr>
+                <td>F1</td>
+                <td><a href="#D1">D1</a> </td>
+                <td>F1 - JOIN ON</td>
+            </tr>
+            <tr>
+                <td>F2</td>
+                <td><a href="#D2">D2</a> <a href="#D15">D15</a> <a href="#D11">D11</a> <a href="#D5">D5</a> <a
+                        href="#D6">D6</a> <a href="#D7">D7</a> <a href="#D12">D12</a> <a href="#D9">D9</a> <a
+                        href="#D10">D10</a> <a href="#D13">D13</a> <a href="#D14">D14</a> <a href="#D17">D17</a> <a
+                        href="#D20">D20</a> <a href="#D21">D21</a> <a href="#D22">D22</a> <a href="#D25">D25</a> </td>
+                <td>F2 - NATURAL JOIN|JOIN USING</td>
+            </tr>
+            <tr>
+                <td>F2R</td>
+                <td><a href="#D2">D2</a> <a href="#D11">D11</a> <a href="#D5">D5</a> <a href="#D7">D7</a> <a
+                        href="#D12">D12</a> <a href="#D13">D13</a> <a href="#D14">D14</a> </td>
+                <td>F2 (RA) - NATURAL JOIN|JOIN USING</td>
+            </tr>
+            <tr>
+                <td>F3</td>
+                <td><a href="#D4">D4</a> <a href="#D21">D21</a> </td>
+                <td>F3 - CROSS JOIN</td>
+            </tr>
+            <tr>
+                <td>F3R</td>
+                <td><a href="#D4">D4</a> </td>
+                <td>F3 (RA) - CROSS JOIN</td>
+            </tr>
+            <tr>
+                <td>F4</td>
+                <td><a href="#D3">D3</a> <a href="#D18">D18</a> </td>
+                <td>F4 - LEFT|RIGHT OUTER JOIN</td>
+            </tr>
+            <tr>
+                <td>F5</td>
+                <td><a href="#D6">D6</a> </td>
+                <td>F5 - FULL (OUTER) JOIN</td>
+            </tr>
+            <tr>
+                <td>G1</td>
+                <td><a href="#D2">D2</a> <a href="#D15">D15</a> <a href="#D5">D5</a> <a href="#D8">D8</a> <a
+                        href="#D17">D17</a> <a href="#D22">D22</a> <a href="#D23">D23</a> <a href="#D25">D25</a> </td>
+                <td>G1 - Nested query in WHERE clause</td>
+            </tr>
+            <tr>
+                <td>G1R</td>
+                <td><a href="#D2">D2</a> <a href="#D5">D5</a> <a href="#D8">D8</a> </td>
+                <td>G1 (RA) - Nested query in WHERE clause</td>
+            </tr>
+            <tr>
+                <td>G2</td>
+                <td><a href="#D9">D9</a> <a href="#D10">D10</a> <a href="#D21">D21</a> </td>
+                <td>G2 - Nested query in FROM clause</td>
+            </tr>
+            <tr>
+                <td>G3</td>
+                <td><a href="#D16">D16</a> </td>
+                <td>G3 - Nested query in SELECT clause</td>
+            </tr>
+            <tr>
+                <td>G4</td>
+                <td><a href="#D2">D2</a> <a href="#D15">D15</a> <a href="#D17">D17</a> </td>
+                <td>G4 - Relative nested query (EXISTS|NOT EXISTS)</td>
+            </tr>
+            <tr>
+                <td>G4R</td>
+                <td><a href="#D2">D2</a> </td>
+                <td>G4 (RA) - Relative nested query (EXISTS|NOT EXISTS)</td>
+            </tr>
+            <tr>
+                <td>H1</td>
+                <td><a href="#D7">D7</a> <a href="#D21">D21</a> </td>
+                <td>H1 - Set unification - UNION</td>
+            </tr>
+            <tr>
+                <td>H1R</td>
+                <td><a href="#D7">D7</a> </td>
+                <td>H1 (RA) - Set unification - UNION</td>
+            </tr>
+            <tr>
+                <td>H2</td>
+                <td><a href="#D15">D15</a> <a href="#D11">D11</a> <a href="#D1">D1</a> <a href="#D17">D17</a> </td>
+                <td>H2 - Set difference - MINUS or EXCEPT</td>
+            </tr>
+            <tr>
+                <td>H2R</td>
+                <td><a href="#D11">D11</a> <a href="#D1">D1</a> </td>
+                <td>H2 (RA) - Set difference - MINUS or EXCEPT</td>
+            </tr>
+            <tr>
+                <td>H3</td>
+                <td><a href="#D12">D12</a> </td>
+                <td>H3 - Set intersection - INTERSECT</td>
+            </tr>
+            <tr>
+                <td>I1</td>
+                <td><a href="#D9">D9</a> <a href="#D10">D10</a> <a href="#D16">D16</a> <a href="#D18">D18</a> <a
+                        href="#D24">D24</a> <a href="#D25">D25</a> </td>
+                <td>I1 - Aggregate functions (count|sum|min|max|avg)</td>
+            </tr>
+            <tr>
+                <td>I2</td>
+                <td><a href="#D9">D9</a> <a href="#D10">D10</a> <a href="#D18">D18</a> <a href="#D24">D24</a> </td>
+                <td>I2 - Aggregate function over grouped rows - GROUP BY (HAVING)</td>
+            </tr>
+            <tr>
+                <td>J</td>
+                <td><a href="#D17">D17</a> </td>
+                <td>J - Same query in 3 different sql statements</td>
+            </tr>
+            <tr>
+                <td>K</td>
+                <td><a href="#D18">D18</a> </td>
+                <td>K - All clauses in one query - SELECT FROM WHERE GROUP BY HAVING ORDER BY</td>
+            </tr>
+            <tr>
+                <td>L</td>
+                <td><a href="#D19">D19</a> </td>
+                <td>L - View</td>
+            </tr>
+            <tr>
+                <td>M</td>
+                <td><a href="#D20">D20</a> </td>
+                <td>M - Query over a view</td>
+            </tr>
+            <tr>
+                <td>N</td>
+                <td><a href="#D21">D21</a> </td>
+                <td>N - INSERT, which insert a set of rows, which are the result of another subquery (an INSERT command
+                    which has VALUES clause replaced by a nested query.</td>
+            </tr>
+            <tr>
+                <td>O</td>
+                <td><a href="#D22">D22</a> </td>
+                <td>O - UPDATE with nested SELECT statement</td>
+            </tr>
+            <tr>
+                <td>P</td>
+                <td><a href="#D23">D23</a> </td>
+                <td>P - DELETE with nested SELECT statement</td>
+            </tr>
+        </tbody>
+    </table>
+    <h2>Scripts</h2>
+    <p>
+        <a href="./create.sql">create.sql</a>
+    </p>
+    <p>
+        <a href="./insert.sql">insert.sql</a>
+    </p>
+    <h2>Conclusion</h2>
+    <p>I have been working on my coursework for the first time since the 8th grade, I like databases, so I was
+        interested in doing the work. I learned how to create conceptual schemas, transform them, distinguish between
+        relational and conceptual schemas, write queries in relational algebra, and, of course, in sql, which I liked
+        the most. It took me the longest to come up with the topic and write queries, but as the topic is interesting
+        and necessary in my opinion, I really enjoyed it. Of course I think that my database could be made even better
+        and add more functionality, maybe one day I will do it and write even an application</p>
+    <p></p>
+    <p></p>
+    <h2>References</h2>
+    <p>[1] Stránky předmětu DBS.BI-DBS FIT ČVUT Course Pages [online]. FIT ČVUT, 2021, [cit. 2023-05-13]. Available
+        from: https://courses.fit.cvut.cz</p>
+    <p></p>
+    <p>[2] HUNKA, Jiri. Demo semestrálka pro práci s PostgreSQL. FIT ČVUT [online]. [cit. 2023-05-13]. Available from:
+        https://users.fit.cvut.cz/~hunkajir/dbs2/main.xml#D20</p>
+    <p></p>
+    <p>[3] Mockaroo - Random Data Generator and API Mocking Tool | JSON / CSV / SQL / Excel. Mockaroo - Random Data
+        Generator and API Mocking Tool | JSON / CSV / SQL / Excel [online]. [cit. 2023-05-13]. Available from :
+        https://www.mockaroo.com/</p>
+    <p></p>
+    <p>[4] The PostgreSQL Global Development Group. PostgreSQL 12.7 Documentation [online]. PostgreSQL, 2021, [cit.
+        20.2.2011]. Available from: https://www.postgresql.org/files/documentation/pdf/12/postgresql-12-A4.pdf</p>
+    <p></p>
+    <p>[5] Postgres Setval Sequence. Postgres Setval Sequence [online]. [cit. 2023-05-13]. Available from:
+        https://linuxhint.com/postgres-setval-sequence/</p>
+</body>
+
+</html>
